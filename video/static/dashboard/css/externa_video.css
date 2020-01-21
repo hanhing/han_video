@@ -1,0 +1,25 @@
+.open-btn{
+    margin: 20px;
+}
+.video-select{
+    width: 30%;
+    display: inline-block;
+}
+.add_video_area{
+    width: 50%;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    margin-top: 10px;
+    margin-left: 20px;
+    border-radius: 8px;
+    display: none;
+}
+.video-images{
+    width: 50px;
+}
+.info{
+    width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
