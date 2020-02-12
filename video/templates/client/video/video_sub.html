@@ -1,0 +1,67 @@
+<%inherit file="../base.html"/>
+<%def name="content()">
+<%!
+from django.shortcuts import reverse
+from app.model.video import FromType
+from app.utils.utils import client_auth
+
+%>
+<img src="${video.image}" class="video-image-sub" width="100%" height="350px">
+<script src="/static/dashboard/js/video_sub.js"></script>
+<div class="data">
+    <p><span class="span">名称:</span><br>${video.name}</p>
+    <p>
+        <span class="span">演员:</span>
+        % for man in video.video_star.all():
+        <li>${man.name}:${man.ident}</li>
+        % endfor
+    </p>
+    <p>
+        <span class="span">简介:</span><br>
+        <span class="info">${video.info}</span>
+    </p>
+    <p>
+        <span class="span">选集</span><br>
+        % if FromType(video.from_to) == FromType.custom and not client_auth(request):
+        <a href="${reverse('client_auth')}">请您登录</a>
+        % else:
+        <ul class="number-ul">
+        % for data in video.video_sub.all():
+        <li><a id="play" href="${data.url}" target="_blank" onclick="playideo('${data.url}')">第${data.number}</a></li>
+        % endfor
+        </ul>
+        %endif
+    </p>
+    <p>
+        <span class="span">评论区域</span><br>
+        <div class="commont-area">
+            % if user:
+            <textarea id="comment-content"></textarea>
+            <button id="comment-submit" data-url="${reverse('client_add_comment')}" data-user-id="${user.id}" data-video-id="${video.id}">提交</button>
+            % else:
+            <a href="${reverse('client_auth')}">登录后可评论</a>
+            %endif
+        </div>
+    </p>
+    <div class="comment-show-area">
+        <span class="span">评论区</span>
+        <div id="ajax-comment-show"></div>
+        <ul class="comment-show">
+            % for comment in comments:
+            <li>
+                <span>${comment.content}</span>
+                <span>${comment.user.username}</span>
+            </li>
+            %endfor
+        </ul>
+    </div>
+</div>
+</%def>
+<%def name="css()">
+<link rel="stylesheet" href="/static/client/css/video_sub.css">
+</%def>
+
+<%def name="js()">
+<script src="/static/client/js/video_sub.js"></script>
+</%def>
+

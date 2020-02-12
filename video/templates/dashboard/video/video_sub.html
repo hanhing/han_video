@@ -1,48 +1,12 @@
 <%inherit file="../base.html"/>
 <%!
 from django.shortcuts import reverse
-from app.model.video import IdentityType
+from app.model.video import IdentityType, FromType
 %>
 <%def name="content()">
 <h1>${video.name}<label>${error}</label></h1>
-
-<h2>集数</h2>
-<table class="table">
-    <thead>
-    <tr>
-        <th>集数</th>
-        <th>地址</th>
-        <th>预览</th>
-    </tr>
-    </thead>
-    <tbody>
-    % for video_sub in video.video_sub.all():
-    <tr>
-        <td>${video_sub.number}</td>
-        <td>${video_sub.url}</td>
-        <td><li><a href="${video_sub.url}">查看</a></li></td>
-    </tr>
-    % endfor
-
-    </tbody>
-</table>
-
-<h2>演员</h2>
-<ul>
-%for video_star in video.video_star.all():
-    <li>
-        ${video_star.name}:${IdentityType(video_star.identity).label}
-        <a href="${reverse('star_delete', kwargs={'star_id': video_star.id, 'video_id': video.id})}">删除</a>
-    </li>
-%endfor
-</ul>
-<form action="${reverse('video_sub_post',kwargs={'video_id': video.id})}" class="form-horizontal edit-area add_video_area add-url" method="get">
-    <label>添加地址</label><input type="text" name="url" class="form-control">
-    <input type="submit" value="添加" class="btn btn-info" id="btn-url-btn">
-</form>
-
 <form action="${reverse('video_star')}" class="form-horizontal edit-area add_video_area add-url" method="get">
-
+    <p>演员与身份编辑区域</p>
     <label>演员</label><input type="text" name="name" class="form-control"><br>
         <label>身份</label>
         <select class="form-control" name="identity">
@@ -53,7 +17,74 @@ from app.model.video import IdentityType
     <input type="hidden" value="${video.id}" name="video_id">
     <input type="submit" value="添加" class="btn btn-info" id="btn-star-btn">
 </form>
+
+
+%if FromType(video.from_to) == FromType.custom:
+<form action="/dashboard/video/videosubpost/${video.id}" enctype="multipart/form-data" class="form-horizontal edit-area add_video_area add-url" method="post">
+%else:
+<form action="/dashboard/video/videosubpost/${video.id}" enctype="multipart/form-data" class="form-horizontal edit-area add_video_area add-url" method="post">
+%endif
+    <p>地址与选集编辑区域</p>
+    %if FromType(video.from_to) != FromType.custom:
+    <label>添加地址</label>
+    <input id="url" type="text" name="url" class="form-control" placeholder=""><br>
+    %else:
+    <label>添加文件</label>
+    <input id="url" type="file" name="url" class="form-control"><br>
+    %endif
+    <label>添加集数</label>
+    <input id="number" type="number" name="number" class="form-control" placeholder="">
+    <input type="hidden" value="" name="videosub_id" id="videosub-input-id">
+    <input type="submit" value="添加" class="btn btn-info" id="btn-url-btn">
+</form>
+<h2>集数</h2>
+<table class="table">
+    <thead>
+    <tr>
+        <th>集数</th>
+        <th>地址</th>
+        <th>控制</th>
+    </tr>
+    </thead>
+    <tbody>
+    % for video_sub in video.video_sub.all():
+    <tr>
+        <td>第${video_sub.number}集</td>
+        % if FromType(video.from_to) == FromType.custom:
+        <td><p class="info">${video_sub.url or '处理中,请稍后'}</p></td>
+        % else:
+        <td><p class="info">${video_sub.url}</p></td>
+        %endif
+        <td>
+            <a id="play" target="_blank" onclick="playideo('${video_sub.url}')">查看</a>
+            <button  class="btn btn-default updata-btn" data-id="${video_sub.id}"
+                     data-number="${video_sub.number}" data-url="${video_sub.url}">
+                编辑</button>
+            <a href="${reverse('sub_delete', kwargs={'videosub_id': video_sub.id, 'video_id': video.id})}" class="btn btn-default">删除</a>
+        </td>
+    </tr>
+    % endfor
+
+    </tbody>
+</table>
+
+<h2>演员(点击可删除)</h2>
+<ul>
+%for video_star in video.video_star.all():
+    <li>
+        ${video_star.name}:${IdentityType(video_star.identity).label}
+        <a href="${reverse('star_delete', kwargs={'star_id': video_star.id, 'video_id': video.id})}">删除</a>
+    </li>
+%endfor
+</ul>
+{#    #}
 </%def>
 <%def name="css()">
 <link rel="stylesheet" href="/static/dashboard/css/video_sub.css">
 </%def>
+
+<%def name="js()">
+<script src="/static/dashboard/js/video_sub.js"></script>
+<script src="/static/dashboard/js/bootstrap.min.js"></script>
+</%def>
+

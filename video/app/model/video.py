@@ -72,6 +72,7 @@ class Video(models.Model):
     class Meta:
         unique_together = ('name', 'video_type', 'from_to', 'nationality')  # 联合索引,只有其中之一不重复即可
 
+
     def __str__(self):
         return self.name
 
@@ -85,6 +86,16 @@ class VideoStar(models.Model):
     class Meta:
         unique_together = ('video', 'name', 'identity')
 
+    @property
+    def ident(self):
+        try:
+            result = IdentityType(self.identity)
+        except:
+            return ''
+        return result.label
+
+    def __str__(self):
+        return self.name
 
 # 播放地址
 class VideoSub(models.Model):
